@@ -1,10 +1,12 @@
-# app.py
-from flask import Flask, render_template, request, redirect, flash
+from flask import Flask, render_template, request, redirect, flash, url_for
 from utils import image_processing, gemini_api, nutrition_api
 from config.config import Config
 from urllib.parse import quote
 import logging
 import requests
+import os
+from werkzeug.utils import secure_filename
+import time
 
 # ロギングの設定
 logging.basicConfig(level=logging.DEBUG)
@@ -13,6 +15,15 @@ logger = logging.getLogger(__name__)
 app = Flask(__name__)
 app.secret_key = Config.FLASK_SECRET_KEY
 
+# アップロード設定
+UPLOAD_FOLDER = 'static/uploads'
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 @app.route("/", methods=["GET", "POST"])
 def index():
@@ -24,11 +35,21 @@ def index():
         if file.filename == "":
             flash("ファイルが選択されていません")
             return redirect(request.url)
-        if file:
+        if file and allowed_file(file.filename):
             try:
+                # 安全なファイル名を生成
+                filename = secure_filename(file.filename)
+                timestamp = str(int(time.time()))
+                filename = f"{timestamp}_{filename}"
+                filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                
+                # 画像を保存
+                file.save(filepath)
+                
                 logger.debug("画像の前処理を開始")
                 # 画像の前処理（リサイズ等）
-                processed_image = image_processing.preprocess_image(file)
+                with open(filepath, 'rb') as img_file:
+                    processed_image = image_processing.preprocess_image(img_file)
                 
                 logger.debug("Gemini APIによる食品認識を開始")
                 # geminiAPI で食品認識を実施し、英語の食品名を取得
@@ -51,7 +72,8 @@ def index():
                         "index.html",
                         nutrition_results=nutrition_results,
                         recognized_food_en=food_text_en,
-                        recognized_food_ja=food_text_ja
+                        recognized_food_ja=food_text_ja,
+                        image_file=filename
                     )
                 else:
                     flash("栄養情報の取得に失敗しました。")

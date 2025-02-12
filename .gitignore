@@ -3,3 +3,6 @@ venv
 
 # Database
 database.db
+
+# Uploaded images
+static/uploads/

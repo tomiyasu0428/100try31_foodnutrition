@@ -70,10 +70,10 @@ def get_nutrition_info(query):
             },
             "ビタミン・ミネラル": {
                 "カリウム": f"{food.get('nf_potassium', 0)}mg",
-                "鉄分": f"{food.get('nf_iron_dv', 0)}%",
-                "カルシウム": f"{food.get('nf_calcium_dv', 0)}%",
-                "ビタミンA": f"{food.get('nf_vitamin_a_dv', 0)}%",
-                "ビタミンC": f"{food.get('nf_vitamin_c_dv', 0)}%"
+                "鉄分": f"{next((n['value'] for n in food.get('full_nutrients', []) if n['attr_id'] == 303), 0):.1f}mg ({food.get('nf_iron_dv', 0)}%)",
+                "カルシウム": f"{next((n['value'] for n in food.get('full_nutrients', []) if n['attr_id'] == 301), 0):.1f}mg ({food.get('nf_calcium_dv', 0)}%)",
+                "ビタミンA": f"{next((n['value'] for n in food.get('full_nutrients', []) if n['attr_id'] == 320), 0):.1f}µg ({food.get('nf_vitamin_a_dv', 0)}%)",
+                "ビタミンC": f"{next((n['value'] for n in food.get('full_nutrients', []) if n['attr_id'] == 401), 0):.1f}mg ({food.get('nf_vitamin_c_dv', 0)}%)"
             }
         }
         

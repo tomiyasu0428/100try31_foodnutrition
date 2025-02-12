@@ -1,4 +1,3 @@
-<!-- templates/index.html -->
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -24,6 +23,12 @@
         .nutrition-table td:first-child {
             font-weight: bold;
             width: 40%;
+        }
+        .uploaded-image {
+            max-height: 300px;
+            width: auto;
+            margin: 0 auto;
+            display: block;
         }
     </style>
 </head>
@@ -57,6 +62,18 @@
             <div class="row justify-content-center">
                 <div class="col-md-8">
                     <h2 class="mb-4">分析結果</h2>
+
+                    <!-- アップロードされた画像の表示 -->
+                    {% if image_file %}
+                    <div class="card nutrition-card">
+                        <div class="card-header">アップロードされた画像</div>
+                        <div class="card-body text-center">
+                            <img src="{{ url_for('static', filename='uploads/' + image_file) }}" 
+                                 alt="アップロードされた食品画像" 
+                                 class="img-fluid rounded uploaded-image">
+                        </div>
+                    </div>
+                    {% endif %}
                     
                     <!-- 基本情報 -->
                     <div class="card nutrition-card">
